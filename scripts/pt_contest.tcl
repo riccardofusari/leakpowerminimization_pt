@@ -49,9 +49,9 @@ suppress_message PWR-602
 ##
 ######################################################################
 # DEFINE CIRCUITS
-# set blockName "c432"
-set blockName "c1908"
-# set blockName "c5315"
+#set blockName "c432"
+#set blockName "c1908"
+set blockName "c5315"
 
 # DEFINE INPUT FILES
 set dir "./saved/${blockName}/synthesis"
@@ -83,11 +83,11 @@ foreach_in_collection cell [get_cells] {
 }
 
 set slackThreshold 0.05
-set maxFanoutEndpointCost 0.4
+set maxFanoutEndpointCost 0.8
 
 # Run dualVth assignment
 # Please, replace N with the Group ID
-source ./scripts/dualVth_Group_N.tcl
+source ./scripts/dualVth_Group_10.tcl
 set start_time [clock milliseconds]
 dualVth $slackThreshold $maxFanoutEndpointCost
 set end_time [clock milliseconds]

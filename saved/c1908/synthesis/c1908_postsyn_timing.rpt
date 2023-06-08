@@ -1,0 +1,57 @@
+****************************************
+Report : timing
+	-path_type full
+	-delay_type max
+	-max_paths 1
+	-sort_by slack
+Design : c1908
+Version: O-2018.06-SP4
+Date   : Thu Jun  1 17:28:50 2023
+****************************************
+
+
+  Startpoint: N43 (input port clocked by clk)
+  Endpoint: N2890 (output port clocked by clk)
+  Path Group: clk
+  Path Type: max
+
+  Point                                    Incr       Path
+  ---------------------------------------------------------------
+  clock clk (rise edge)                0.000000   0.000000
+  clock network delay (ideal)          0.000000   0.000000
+  input external delay                 0.150000   0.150000 r
+  N43 (in)                             0.020701   0.170701 r
+  U315/Z (HS65_LLS_XNOR2X6)            0.055566   0.226267 r
+  U299/Z (HS65_LLS_XNOR2X6)            0.061829   0.288096 r
+  U188/Z (HS65_LLS_XNOR2X6)            0.071271   0.359367 r
+  U362/Z (HS65_LLS_XNOR2X6)            0.071470   0.430837 f
+  U200/Z (HS65_LL_NOR2X6)              0.035936   0.466772 r
+  U300/Z (HS65_LLS_XNOR2X6)            0.052722   0.519494 f
+  U185/Z (HS65_LL_NOR2AX3)             0.063559   0.583053 r
+  U183/Z (HS65_LL_AND2X4)              0.088023   0.671076 r
+  U304/Z (HS65_LL_NAND2X7)             0.038290   0.709366 f
+  U263/Z (HS65_LL_IVX7)                0.031226   0.740592 r
+  U196/Z (HS65_LL_NAND2X4)             0.046064   0.786656 f
+  U379/Z (HS65_LL_NOR4ABX4)            0.060448   0.847104 f
+  U197/Z (HS65_LL_NAND2X14)            0.026095   0.873198 r
+  U209/Z (HS65_LL_NOR2X19)             0.020086   0.893285 f
+  U214/Z (HS65_LL_NOR2AX25)            0.028245   0.921530 r
+  U251/Z (HS65_LL_NAND2X4)             0.034358   0.955888 f
+  U247/Z (HS65_LLS_XNOR2X6)            0.044833   1.000721 f
+  U324/Z (HS65_LL_AND2ABX18)           0.097552   1.098273 r
+  N2890 (out)                          0.000322   1.098595 r
+  data arrival time                               1.098595
+
+  clock clk (rise edge)                1.250000   1.250000
+  clock network delay (ideal)          0.000000   1.250000
+  clock reconvergence pessimism        0.000000   1.250000
+  output external delay                -0.150000  1.100000
+  data required time                              1.100000
+  ---------------------------------------------------------------
+  data required time                              1.100000
+  data arrival time                               -1.098595
+  ---------------------------------------------------------------
+  slack (MET)                                     0.001405
+
+
+1

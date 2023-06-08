@@ -36,7 +36,7 @@ suppress_message CMD-041
 ##
 ######################################################################
 # DEFINE CIRCUITS
-set blockName "aes_cipher_top"
+set blockName "c1908"
 
 # DEFINE INPUT FILES
 set dir "./saved/${blockName}/synthesis"
@@ -92,4 +92,4 @@ report_power > $power_rpt
 ##
 ######################################################################
 
-#exit
+exit

@@ -32,7 +32,11 @@ suppress_message RTDC-126
 ######################################################################
 
 # DEFINE CIRCUITS and WORK DIRS
-set blockName "aes_cipher_top"
+#set blockName "c1908"
+set blockName "c5315"
+#set blockName "c5315"
+
+
 set active_design $blockName
 
 # DEFINE WORK DIRS
@@ -70,8 +74,8 @@ elaborate -lib $blockName $blockName
 # set_operating_condition -library  "${target_library}:CORE65LPSVT" nom_1.20V_25C
 #set_operating_condition -library "[lindex $target_library 0]:CORE65LPLVT" nom_1.20V_25C
 
-set_operating_condition -library "[lindex ${target_library} 0 ]:CORE65LPLVT" nom_1.20V.25C
-set_wire_load_model -library "${target_library}:CORE65LPSVT" -name area_12Kto18K [find design *]
+set_operating_condition -library "[lindex $target_library 0]:CORE65LPLVT" nom_1.20V_25C
+set_wire_load_model -library "[lindex $target_library 0]:CORE65LPLVT" -name area_12Kto18K [find design *]
 set_load 0.05 [all_outputs]
 
 ######################################################################
@@ -89,7 +93,9 @@ source "./rtl/${blockName}/sdc/${blockName}.sdc"
 link
 ungroup -all -flatten
 
-compile
+#compile
+set_attribute [find library CORE65LPLVT] default_threshold_voltage_group LVT -type string
+compile_ultra
 
 optimize_registers -clock $clockName -minimum_period_only
 set_fix_hold $clockName
