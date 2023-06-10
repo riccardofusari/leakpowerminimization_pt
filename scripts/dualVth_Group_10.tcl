@@ -8,7 +8,7 @@
 ## Authors      : Riccardo Fusari, Manuela Corona, Federico Fruttero
 ##
 ##################################################################################################
-## Description  : This script implement a Leakage power minimization procedure in Prime time
+## Description  : This script implements a Leakage power minimization procedure in Prime time
 ##                by swapping LVT cells to HVT cells under slack and max fanout end point constraints 
 ##
 ##################################################################################################
