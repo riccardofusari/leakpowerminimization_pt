@@ -23,6 +23,15 @@ proc swap_to_hvt {} {
     }
 }
 
+proc swap_to_lvt {} {
+    foreach_in_collection cell [get_cells] {
+        set ref_name [get_attribute $cell ref_name]
+        set library_name "CORE65LPHVT"
+        regsub {_LH} $ref_name "_LL" new_ref_name
+        size_cell $cell "${library_name}/${new_ref_name}"
+    }
+}
+
 proc swap_cell_to_lvt {cell} {
     
     set ref_name [get_attribute $cell ref_name]
@@ -33,7 +42,7 @@ proc swap_cell_to_lvt {cell} {
 }
 
 proc swap_cell_to_hvt {cell} {
-    
+
     set ref_name [get_attribute $cell ref_name]
     set library_name "CORE65LPHVT"
     regsub {_LL} $ref_name "_LH" new_ref_name
@@ -49,8 +58,8 @@ proc swap_cell_to_hvt {cell} {
 ################################################################################################
 proc check_contest_constraints {slackThreshold maxFanoutEndpointCost} {
     #Essential otherwise the extimation later can be wrong. This is CPU expensive
-    update_timing -full 
-    
+    update_timing 
+
     # Check Slack
     # For checking the slack I need the most critical path 
     set msc_slack [get_attribute [get_timing_paths] slack]
@@ -211,15 +220,49 @@ proc cells_swapping {cellName_list Vt_type} {
 #}
 #
 proc dualVth {slackThreshold maxFanoutEndpointCost} {
-    
+
     #swap_to_hvt
     #################################################################################
     # Set to HVT
     #################################################################################
     # sort_by_slack decreasing order
     set all_cells [get_cells]
-    #set sorted_cells_by_slack_dec [sort_cells_by_slack_dec $all_cells]
-    set sorted_cells_by_priority_dec [sort_cells_by_priority_dec $all_cells]
+    foreach_in_collection cell $all_cells {
+        set cell_path [get_timing_paths -through $cell]
+        set cell_slack [get_attribute $cell_path slack] 
+        set cell_name [get_attribute $cell full_name]
+        set leakLVT [get_attribute $cell leakage_power]
+        lappend lvt_sorted_cells "$cell_name"
+        lappend lvt_sorted_cells "$cell_slack"
+        lappend lvt_sorted_cells "$leakLVT"  
+    }
+    
+    swap_to_hvt
+    
+    foreach_in_collection cell $all_cells {
+        set cell_path [get_timing_paths -through $cell]
+        set cell_slack [get_attribute $cell_path slack] 
+        set cell_name [get_attribute $cell full_name]
+        set leakHVT [get_attribute $cell leakage_power]
+        lappend hvt_sorted_cells "$cell_name"
+        lappend hvt_sorted_cells "$cell_slack"
+        lappend hvt_sorted_cells "$leakHVT" 
+    }
+
+
+
+    set priority_list ""
+    puts [lindex $hvt_sorted_cells 1]
+    puts [lindex $hvt_sorted_cells 2]
+
+
+    foreach cellLVT $lvt_sorted_cells cellHVT $hvt_sorted_cells {
+        set name [lindex $lvt_sorted_cells 0]
+        set priority [expr {([lindex $lvt_sorted_cells 2] - [lindex $hvt_sorted_cells 2]) * ([lindex $lvt_sorted_cells 1] - [lindex $hvt_sorted_cells 1])}]
+        lappend priority_list [list $name $priority]
+    }
+
+    set sorted_cells_by_priority_dec [lsort -real -decreasing -index 1 $priority_list]
 
     ## Take the 30%
     set cell_num [sizeof_collection [get_cells]]
@@ -239,7 +282,10 @@ proc dualVth {slackThreshold maxFanoutEndpointCost} {
     set tmp $cell_group_num
     set tmp [expr {$tmp + $cell_group_num}]
 
-    while {[check_contest_constraints $slackThreshold $maxFanoutEndpointCost] == 1} {   
+    while {[check_contest_constraints $slackThreshold $maxFanoutEndpointCost] == 1} {
+        
+        puts "timing during hvt"
+        
         #index the group sorted before
         set cell_group [lrange $sorted_cells_by_priority_dec $list_count [expr {$tmp - 1}]]
 
@@ -251,7 +297,9 @@ proc dualVth {slackThreshold maxFanoutEndpointCost} {
         foreach cells $cell_group {
             set cell_name [lindex $cells 0]
             swap_cell_to_hvt [get_cells $cell_name]
-        }        
+        }
+        
+        puts "ahoo"
     }
 
     set cell_num [sizeof_collection [get_cells]]
@@ -261,7 +309,7 @@ proc dualVth {slackThreshold maxFanoutEndpointCost} {
     #################################################################################
 
     #take the 2% of the HVT cells and sort by increasing slack
-    set cell_group_num [expr {int($cell_num * 0.01)}]
+    set cell_group_num [expr {int($cell_num * 0.015)}]
     set hvt_cells [get_cells -filter "lib_cell.threshold_voltage_group == HVT"]
     set sorted_cells [sort_cells_by_slack_inc $hvt_cells]
 
@@ -284,6 +332,7 @@ proc dualVth {slackThreshold maxFanoutEndpointCost} {
 
     #set cell_group_num [expr {int($cell_num * 0.02)}]
     while {[check_contest_constraints $slackThreshold $maxFanoutEndpointCost] == 0} {
+
         set cell_group [lrange $sorted_cells_by_slack_inc $list_count [expr {$tmp - 1}]]
         
         #update the indexes
@@ -291,6 +340,7 @@ proc dualVth {slackThreshold maxFanoutEndpointCost} {
         set tmp [expr {$tmp + $cell_group_num}]
         # Extract the first 20% elements from the sorted list
         #set cell_group [lrange $sorted_cells 0 $cell_group_num]
+
         # Iterate over the extracted elements and perform swaps
         foreach cells $cell_group {
             set cell_name [lindex $cells 0]
@@ -300,3 +350,12 @@ proc dualVth {slackThreshold maxFanoutEndpointCost} {
 
     return 1
 }
+#
+##    sort_by_slack
+##    convert 5%
+#    if constraints met
+#    convert 5%
+#    else
+#    convert LL 2%
+#    if constraints are met
+    #stop
