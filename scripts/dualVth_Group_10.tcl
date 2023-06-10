@@ -154,7 +154,7 @@ proc sort_cells_by_slack_dec {hvt_cells} {
     }
 
 
-    
+
 
     set sorted_cells [lsort -real -decreasing -index 1 $sorted_cells]
 
@@ -276,14 +276,13 @@ proc dualVth {slackThreshold maxFanoutEndpointCost} {
         set cell_name [lindex $cells 0]
         swap_cell_to_lvt [get_cells $cell_name]
     }
-
+    
     #sort lvt cells by decreasing slack
     set hvt_cells [get_cells -filter "lib_cell.threshold_voltage_group == HVT"]
     set sorted_cells_by_slack_inc [sort_cells_by_slack_inc $hvt_cells]
     set list_count  0
     # 10%
     set tmp $cell_group_num
-
 
     #set cell_group_num [expr {int($cell_num * 0.02)}]
     while {[check_contest_constraints $slackThreshold $maxFanoutEndpointCost] == 0} {
@@ -300,6 +299,5 @@ proc dualVth {slackThreshold maxFanoutEndpointCost} {
             swap_cell_to_lvt [get_cells $cell_name]
         }
     }
-
     return 1
 }
