@@ -153,6 +153,9 @@ proc sort_cells_by_slack_dec {hvt_cells} {
         lappend sorted_cells "$cell_name $cell_slack"
     }
 
+
+    
+
     set sorted_cells [lsort -real -decreasing -index 1 $sorted_cells]
 
     return $sorted_cells
