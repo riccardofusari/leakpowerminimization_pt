@@ -9,7 +9,8 @@
 ##
 ##################################################################################################
 ## Description  : This script implements a Leakage power minimization procedure in Prime time
-##                by swapping LVT cells to HVT cells under slack and max fanout end point constraints 
+##                by swapping LVT cells to HVT cells under slack and max fanout end point 
+##                constraints 
 ##
 ##################################################################################################
 
