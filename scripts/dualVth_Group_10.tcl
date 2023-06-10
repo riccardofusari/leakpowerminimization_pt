@@ -1,11 +1,16 @@
 ##################################################################################################
-## Dual VTH Prime Time command
-## This script implement a Leakage power minimization procedure in Prime time
 ##
-## 1. Start with changing all the cells to HVT 
-## 2. While the timing and fanout constraints are not met
-##    a. sort cells
-##    b. size first cells from previous list to LVT
+## Title        : Dual VTH Prime Time command
+## Project      : Low Power Contest
+##
+##################################################################################################
+## File         : dualVth_Group_10.tcl
+## Authors      : Riccardo Fusari, Manuela Corona, Federico Fruttero
+##
+##################################################################################################
+## Description  : This script implement a Leakage power minimization procedure in Prime time
+##                by swapping LVT cells to HVT cells under slack and max fanout end point constraints 
+##
 ##################################################################################################
 
 
@@ -64,7 +69,6 @@ proc check_contest_constraints {slackThreshold maxFanoutEndpointCost} {
     }
     # Check Fanout endpoint cost
     foreach_in_collection cell [get_cells] {
-
         set paths [get_timing_paths -through $cell -nworst 1 -max_paths 10000 -slack_lesser_than $slackThreshold]
         set cell_fanout_endpoint_cost 0.0
         
@@ -83,14 +87,15 @@ proc check_contest_constraints {slackThreshold maxFanoutEndpointCost} {
     return 1
 }
 
-
 ################################################################################################
 ##
-## Sort procedures
+## Sort procedure
+## This procedure sort a list by increasing slack
 ## 
-##
 ################################################################################################
-proc sort_cells_by_priority_dec {hvt_cells} {
+
+
+proc sort_cells_by_slack {hvt_cells} {
 
     set sorted_cells ""
 
@@ -98,18 +103,20 @@ proc sort_cells_by_priority_dec {hvt_cells} {
         set cell_path [get_timing_paths -through $cell]
         set cell_slack [get_attribute $cell_path slack] 
         set cell_name [get_attribute $cell full_name]
-        set cell_leak [get_attribute $cell leakage_power]
-        set cell_priority [expr {$cell_slack * $cell_leak}]
-        lappend sorted_cells "$cell_name $cell_priority"
+        lappend sorted_cells "$cell_name $cell_slack"
     }
-    set sorted_cells [lsort -real -decreasing -index 1 $sorted_cells]
 
+    set sorted_cells [lsort -real -increasing -index 1 $sorted_cells]
     return $sorted_cells
 }
-proc sort_cells_by_priority {hvt_cells} {
 
+################################################################################################
+##
+## List management procedures
+## 
+################################################################################################
+proc leak_slack_list {hvt_cells} {
     set sorted_cells ""
-
     foreach_in_collection cell $hvt_cells {
         set cell_path [get_timing_paths -through $cell]
         set cell_slack [get_attribute $cell_path slack] 
@@ -119,65 +126,6 @@ proc sort_cells_by_priority {hvt_cells} {
     }
     return $sorted_cells
 }
-
-proc sort_cells_by_priority_inc {hvt_cells} {
-
-    set sorted_cells ""
-
-    foreach_in_collection cell $hvt_cells {
-        set cell_path [get_timing_paths -through $cell]
-        set cell_slack [get_attribute $cell_path slack] 
-        set cell_name [get_attribute $cell full_name]
-        set cell_leak [get_attribute $cell leakage_power]
-        set cell_priority [expr {$cell_slack * $cell_leak}]
-        lappend sorted_cells "$cell_name $cell_priority"
-    }
-    set sorted_cells [lsort -real -increasing -index 1 $sorted_cells]
-
-    return $sorted_cells
-}
-
-proc sort_cells_by_slack_inc {hvt_cells} {
-
-    set sorted_cells ""
-
-    foreach_in_collection cell $hvt_cells {
-        set cell_path [get_timing_paths -through $cell]
-        set cell_slack [get_attribute $cell_path slack] 
-        set cell_name [get_attribute $cell full_name]
-        lappend sorted_cells "$cell_name $cell_slack"
-    }
-
-    set sorted_cells [lsort -real -increasing -index 1 $sorted_cells]
-
-    return $sorted_cells
-}
-
-
-
-proc sort_cells_by_slack_dec {hvt_cells} {
-
-    set sorted_cells ""
-
-    foreach_in_collection cell $hvt_cells {
-        set cell_path [get_timing_paths -through $cell]
-        set cell_slack [get_attribute $cell_path slack] 
-        set cell_name [get_attribute $cell full_name]
-        lappend sorted_cells "$cell_name $cell_slack"
-    }
-
-
-    set sorted_cells [lsort -real -decreasing -index 1 $sorted_cells]
-
-    return $sorted_cells
-}
-
-
-################################################################################################
-##
-## Main procedure
-##
-################################################################################################
 
 
 proc priority_list {lvt_list hvt_list} {
@@ -196,46 +144,49 @@ proc priority_list {lvt_list hvt_list} {
     return $result
 }
 
-proc dualVth {slackThreshold maxFanoutEndpointCost} {
-    
-    #################################################################################
-    # Set to HVT
-    #################################################################################
 
+################################################################################################
+##
+## Main procedure
+##
+################################################################################################
+
+proc dualVth {slackThreshold maxFanoutEndpointCost} {
+    #Take the collection and the number of cells
     set all_cells [get_cells]
     set cell_num [sizeof_collection [get_cells]]
 
-    set lvt_list [sort_cells_by_priority $all_cells]
+    #Prepare a list containing the priority of each cell in terms of slack and leakage power
+    set lvt_list [leak_slack_list $all_cells]
     swap_to_hvt
-    set hvt_list [sort_cells_by_priority $all_cells]
+    set hvt_list [leak_slack_list $all_cells]
     swap_to_lvt 
     set priority [priority_list $lvt_list $hvt_list]
     set priority [lsort -real -decreasing -index 1 $priority]
 
-    ## Take the 30%
+    ## Take a certain amount of cell depending how big the design is
     if {$cell_num < 300} {
-        
         set cell_group_num [expr {int($cell_num * 0.8)}]
         set cell_group [lrange $priority 0 $cell_group_num]
     } else {
         set cell_group_num [expr {int($cell_num * 0.3)}]
         set cell_group [lrange $priority 0 $cell_group_num]
     }
-
+    #################################################################################
+    # Set to HVT
+    #################################################################################
     # Iterate over the extracted elements and perform swaps
     foreach cells $cell_group {
         set cell_name [lindex $cells 0]
         swap_cell_to_hvt [get_cells $cell_name]
     }
 
-    #sort lvt cells by decreasing slack
-    #set lvt_cells [get_cells -filter "lib_cell.threshold_voltage_group == LVT"]
-    #set sorted_cells_by_slack_dec [sort_cells_by_slack_dec $lvt_cells]
+    # Indexes
     set list_count  $cell_group_num
-    set tmp $cell_group_num
-    set tmp [expr {$tmp + $cell_group_num}]
+    set tmp [expr {2 * $cell_group_num}]
 
-    while {[check_contest_constraints $slackThreshold $maxFanoutEndpointCost] == 1} {   
+    # Check if we can do other swaps
+    while {[check_contest_constraints $slackThreshold $maxFanoutEndpointCost]} {   
         #index the group sorted before
         set cell_group [lrange $priority $list_count [expr {$tmp - 1}]]
 
@@ -250,18 +201,16 @@ proc dualVth {slackThreshold maxFanoutEndpointCost} {
         }        
     }
 
-    set cell_num [sizeof_collection [get_cells]]
-
     #################################################################################
     # Set to LVT
     #################################################################################
 
-    #take the 2% of the HVT cells and sort by increasing slack
+    #take the 1.5% and sort by increasing slack
     set cell_group_num [expr {int($cell_num * 0.015)}]
     set hvt_cells [get_cells -filter "lib_cell.threshold_voltage_group == HVT"]
-    set sorted_cells [sort_cells_by_slack_inc $hvt_cells]
+    set sorted_cells [sort_cells_by_slack $hvt_cells]
 
-    # Extract the first 2% elements from the sorted list
+    # Extract the elements from the sorted list
     set cell_group [lrange $sorted_cells 0 [expr {$cell_group_num - 1}]]
 
     # Iterate over the extracted elements and perform swaps
@@ -273,16 +222,14 @@ proc dualVth {slackThreshold maxFanoutEndpointCost} {
     set list_count  $cell_group_num
     set tmp [expr {2 * $cell_group_num}]
 
-    #set cell_group_num [expr {int($cell_num * 0.02)}]
+    #Swap to LVT until constraints are met
     while {[check_contest_constraints $slackThreshold $maxFanoutEndpointCost] == 0} {
         set cell_group [lrange $sorted_cells $list_count [expr {$tmp - 1}]]
         
         #update the indexes
         set list_count [expr {$list_count + $cell_group_num}]
         set tmp [expr {$tmp + $cell_group_num}]
-        # Extract the first 20% elements from the sorted list
-        #set cell_group [lrange $sorted_cells 0 $cell_group_num]
-        # Iterate over the extracted elements and perform swaps
+
         foreach cells $cell_group {
             set cell_name [lindex $cells 0]
             swap_cell_to_lvt [get_cells $cell_name]
