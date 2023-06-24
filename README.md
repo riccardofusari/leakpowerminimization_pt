@@ -10,10 +10,10 @@ This directory contains three circuits along with their respective SDC (Synopsys
 This folder is used to store the post-synthesis netlist, SDC, and reports generated during the synthesis and analysis process.
 ### Sripts
 This directory contains all the scripts required for optimizing a digital circuit.
-### tech
+### Tech
 Here, the technology library used is provided, specifically the STMicroelectronics 65nm library.
 
-### Scripts overview
+# Scripts overview
 Let's provide a brief overview of the different scripts in the repository:
 ##### synthesis.tcl
 This script performs the synthesis of a given circuit using the nominal LVT (Low Voltage Threshold) library. The results of the synthesis process are saved in the "saved/" directory.
@@ -31,7 +31,7 @@ By following this repository structure and utilizing the provided scripts, you c
 Please note that this script assumes the use of the STMicroelectronics 65nm library. If you are using a different library, you may need to adapt the scripts accordingly.
 
 
-### Dual VTH algorithm
+# Dual VTH algorithm
 
 The Dual VTH algorithm is designed to minimize leakage power in a design by swapping cells between Low-Voltage Threshold (LVT) and High-Voltage Threshold (HVT) libraries while considering slack and max fanout endpoint constraints.
 
@@ -50,7 +50,7 @@ $priority = \frac{leak_{lvt} − leak_{hvt}}{slack_{lvt} − slack_{hvt}}$
 - Repeat the process: If the constraints are not satisfied, go back to the swapping step and repeat the process until the constraints are met.
 
 
-### Usage
+# Usage
 
 After you have modified the swap procedures accordingly to your technology library, modify the circuit name into the synthesis script, pt_analysis script, pt_contest script, you can run all the script using Desing Compiler and Prime Time.
 
