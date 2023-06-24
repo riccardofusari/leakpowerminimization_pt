@@ -86,8 +86,7 @@ set slackThreshold 0.05
 set maxFanoutEndpointCost 0.8
 
 # Run dualVth assignment
-# Please, replace N with the Group ID
-source ./scripts/dualVth_Group_10.tcl
+source ./scripts/dualVth.tcl
 set start_time [clock milliseconds]
 dualVth $slackThreshold $maxFanoutEndpointCost
 set end_time [clock milliseconds]
