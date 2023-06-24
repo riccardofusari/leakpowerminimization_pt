@@ -4,8 +4,8 @@
 ## Project      : Low Power Contest
 ##
 ##################################################################################################
-## File         : dualVth_Group_10.tcl
-## Authors      : Riccardo Fusari, Manuela Corona, Federico Fruttero
+## File         : dualVth.tcl
+## Authors      : Riccardo Fusari
 ##
 ##################################################################################################
 ## Description  : This script implements a Leakage power minimization procedure in Prime time
