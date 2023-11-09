@@ -11,8 +11,7 @@ This folder is used to store the post-synthesis netlist, SDC, and reports genera
 ### Sripts
 This directory contains all the scripts required for optimizing a digital circuit.
 ### Tech
-Here, the technology library used is provided, specifically the STMicroelectronics 65nm library.
-
+This directory contains the technology library. I used the STMicroelectronics 65nm library. Put inside this folder the library you want to use.
 # Scripts overview
 Let's provide a brief overview of the different scripts in the repository:
 ##### synthesis.tcl
